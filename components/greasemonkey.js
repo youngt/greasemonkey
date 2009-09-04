@@ -327,7 +327,7 @@ var greasemonkeyService = {
     try {
       // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
       var lineFinder = new Error();
-      Components.utils.evalInSandbox(code, sandbox);
+      Components.utils.evalInSandbox(code, sandbox, "1.8");
     } catch (e) { // catches errors while running the script code
       try {
         if (e && "return not in function" == e.message)
