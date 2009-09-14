@@ -10,8 +10,6 @@ const appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
 
 const gmSvcFilename = Components.stack.filename;
 
-<<<<<<< HEAD:components/greasemonkey.js
-=======
 var maxJSVersion = (function getMaxJSVersion() {
   var versions = [0];
   var jsds = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService()
@@ -32,7 +30,6 @@ var maxJSVersion = (function getMaxJSVersion() {
   return (max / 100).toString();
 })();
 
->>>>>>> 059f61d... Oh, joy; now it works when run once at init time, too.:components/greasemonkey.js
 function alert(msg) {
   Cc["@mozilla.org/embedcomp/prompt-service;1"]
     .getService(Ci.nsIPromptService)
@@ -350,11 +347,7 @@ var greasemonkeyService = {
     try {
       // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=307984
       var lineFinder = new Error();
-<<<<<<< HEAD:components/greasemonkey.js
-      Components.utils.evalInSandbox(code, sandbox, "1.8");
-=======
       Components.utils.evalInSandbox(code, sandbox, maxJSVersion);
->>>>>>> 059f61d... Oh, joy; now it works when run once at init time, too.:components/greasemonkey.js
     } catch (e) { // catches errors while running the script code
       try {
         if (e && "return not in function" == e.message)
