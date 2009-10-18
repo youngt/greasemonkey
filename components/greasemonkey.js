@@ -10,24 +10,19 @@ const appSvc = Cc["@mozilla.org/appshell/appShellService;1"]
 
 const gmSvcFilename = Components.stack.filename;
 
-var maxJSVersion = (function getMaxJSVersion() {
-  var versions = [0];
+const maxJSVersion = (function getMaxJSVersion() {
+  // Default to version 1.6, which FF1.5 and later support.
+  var jsVersion = 160;
+
   var jsds = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService()
                .QueryInterface(Ci.jsdIDebuggerService);
   jsds.on();
-  jsds.enumerateContexts({ enumerateContext: function(nsIContext) {
-    versions.push(nsIContext.version);
+  jsds.enumerateContexts({ enumerateContext: function(context) {
+    if (context.version > jsVersion) jsVersion = context.version;
   }});
   jsds.off();
 
-  var max = Math.max.apply(Math, versions);
-  if (!max) return undefined; // worst case, evalInSandbox picks its default
-
-  // Ci.jsdIDebuggerService, in theory, has properties VERSION_<major>_<minor>
-  // constants whose value are the integer we have now -- but we can't reverse
-  // map them, as they are not fully populated (Firefox/3.5.3 supports 1.8 but
-  // has no constants beyond VERSION_1_5 = 150, for instance)
-  return (max / 100).toString();
+  return (jsVersion / 100).toString();
 })();
 
 function alert(msg) {
@@ -326,8 +321,19 @@ var greasemonkeyService = {
     if (!GM_apiLeakCheck("GM_openInTab")) {
       return undefined;
     }
-    var newTab = chromeWin.openNewTabWith(
-      url, safeContentWin.document, null, null, null, null);
+
+    var info = Cc["@mozilla.org/xre/app-info;1"]
+      .getService(Components.interfaces.nsIXULAppInfo);
+    if (parseFloat(info.version, 10) < 3.0) {
+      // Pre FF 3.0 wants the URL as the second argument.
+      var newTab = chromeWin.openNewTabWith(
+        url, safeContentWin.document.location.href, null, null, null, null);
+    } else {
+      // Post FF 3.0 wants the document as the second argument.
+      var newTab = chromeWin.openNewTabWith(
+        url, safeContentWin.document, null, null, null, null);
+    }
+
     // Source:
     // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js#4448
     var newWindow = chromeWin.gBrowser
